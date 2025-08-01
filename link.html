@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Short URL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #039be5;
+            --accent: #ffd600;
+            --secondary: #ff9800;
+            --danger: #e91e63;
+            --bg-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --bg-dark: linear-gradient(135deg, #232526 0%, #414345 100%);
+            --box-light: linear-gradient(135deg, #fff 60%, #e3f2fd 100%);
+            --box-dark: linear-gradient(135deg, #23272b 60%, #232b33 100%);
+            --text-light: #222;
+            --text-dark: #fff;
+            --input-light: #fffbe7;
+            --input-dark: #18191a;
+            --border-light: #039be5;
+            --border-dark: #ffd600;
+        }
+
+        body {
+            background: var(--bg-light);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 48px;
+        }
+
+        .main-title {
+            color: var(--primary);
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+            text-align: center;
+            text-shadow: 0 2px 12px #039be555, 0 1px 0 #fff;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            z-index: 10;
+            background: var(--box-light);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 24px;
+            padding: 7px 22px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #039be522;
+            transition: background 0.2s, color 0.2s, border 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: #fff;
+            border: 2px solid var(--accent);
+        }
+
+        body.dark .theme-toggle {
+            background: var(--box-dark);
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+
+        body.dark .theme-toggle:hover {
+            background: var(--accent);
+            color: #23272b;
+            border: 2px solid var(--primary);
+        }
+
+        .shorten-box {
+            background: var(--box-light);
+            border-radius: 16px;
+            box-shadow: 0 4px 32px #039be522, 0 1.5px 0 #fff;
+            padding: 38px 32px 30px 32px;
+            min-width: 340px;
+            max-width: 98vw;
+            text-align: center;
+            border: 2.5px solid var(--border-light);
+            transition: box-shadow 0.2s, border 0.2s, background 0.3s;
+        }
+
+        .shorten-box:hover {
+            box-shadow: 0 8px 48px #039be555, 0 1.5px 0 #fff;
+            border: 2.5px solid var(--secondary);
+        }
+
+        body.dark .shorten-box {
+            background: var(--box-dark);
+            border: 2.5px solid var(--border-dark);
+            box-shadow: 0 4px 32px #ffd60022, 0 1.5px 0 #23272b;
+        }
+
+        body.dark .shorten-box:hover {
+            border: 2.5px solid var(--primary);
+            box-shadow: 0 8px 48px #ffd60055, 0 1.5px 0 #23272b;
+        }
+
+        .shorten-label {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 24px;
+            text-shadow: 0 2px 8px #ffd60033;
+        }
+
+        .input-row {
+            display: flex;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto 18px auto;
+        }
+
+        .input-row input[type="url"] {
+            flex: 1;
+            padding: 16px 14px;
+            border: 2px solid var(--accent);
+            border-radius: 8px 0 0 8px;
+            font-size: 1.1em;
+            outline: none;
+            background: var(--input-light);
+            color: var(--text-light);
+            transition: border 0.2s, box-shadow 0.2s, background 0.3s, color 0.3s;
+            box-shadow: 0 2px 8px #ffd60022;
+        }
+
+        .input-row input[type="url"]:focus {
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 12px #039be555;
+        }
+
+        body.dark .input-row input[type="url"] {
+            background: var(--input-dark);
+            color: var(--text-dark);
+            border: 2px solid var(--primary);
+        }
+
+        body.dark .input-row input[type="url"]:focus {
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 12px #ffd60055;
+        }
+
+        /* Remove multi-color from button, use solid color */
+        .input-row button {
+            padding: 0 28px;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            background: var(--primary);
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+            box-shadow: 0 2px 8px #039be522;
+            letter-spacing: 0.5px;
+        }
+
+        .input-row button:hover {
+            background: var(--accent);
+            color: #222;
+            box-shadow: 0 0 16px 4px var(--accent), 0 2px 8px #039be522;
+        }
+
+        body.dark .input-row button {
+            background: var(--accent);
+            color: #23272b;
+        }
+
+        body.dark .input-row button:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 16px 4px var(--primary), 0 2px 8px #ffd60022;
+        }
+
+        .desc {
+            color: #444;
+            font-size: 1.08em;
+            margin-top: 10px;
+            margin-bottom: 0;
+            text-shadow: 0 1px 0 #fff;
+        }
+
+        body.dark .desc {
+            color: #eee;
+            text-shadow: 0 1px 0 #23272b;
+        }
+
+        .short-link-section {
+            margin-top: 22px;
+            display: none;
+        }
+
+        .short-link-label {
+            color: var(--primary);
+            font-size: 1.1em;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .short-link-box {
+            background: linear-gradient(90deg, var(--input-light) 60%, #e3f2fd 100%);
+            color: var(--primary);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 1.1em;
+            display: inline-block;
+            margin-bottom: 8px;
+            word-break: break-all;
+            border: 2px solid var(--accent);
+            font-weight: bold;
+            box-shadow: 0 2px 8px #ffd60022;
+            transition: border 0.2s, box-shadow 0.2s, background 0.3s, color 0.3s;
+        }
+
+        .short-link-box:hover {
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 12px #039be555;
+            background: linear-gradient(90deg, #e3f2fd 60%, var(--input-light) 100%);
+            color: var(--secondary);
+        }
+
+        body.dark .short-link-box {
+            background: linear-gradient(90deg, var(--input-dark) 60%, #232b33 100%);
+            color: var(--accent);
+            border: 2px solid var(--primary);
+        }
+
+        body.dark .short-link-box:hover {
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 12px #ffd60055;
+            background: linear-gradient(90deg, #232b33 60%, var(--input-dark) 100%);
+            color: var(--secondary);
+        }
+
+        /* Remove multi-color from copy button, use solid color */
+        .copy-btn {
+            background: var(--primary);
+            color: #fff;
+            margin-left: 10px;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px #039be522;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: #222;
+            box-shadow: 0 0 12px var(--accent);
+        }
+
+        body.dark .copy-btn {
+            background: var(--accent);
+            color: #23272b;
+        }
+
+        body.dark .copy-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 12px var(--primary);
+        }
+
+        .error {
+            color: var(--danger);
+            margin-top: 10px;
+            font-size: 1em;
+        }
+
+        @media (max-width: 600px) {
+            .shorten-box {
+                min-width: 0;
+                width: 98vw;
+                padding: 18px 4vw 18px 4vw;
+            }
+
+            .input-row {
+                flex-direction: column;
+            }
+
+            .input-row input[type="url"],
+            .input-row button {
+                border-radius: 8px !important;
+                margin-bottom: 8px;
+            }
+
+            .input-row button {
+                width: 100%;
+            }
+
+            .theme-toggle {
+                right: 10px;
+                top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+    <div class="centered">
+        <div class="main-title">Short URL</div>
+        <div class="shorten-box">
+            <div class="shorten-label">Paste the URL to be shortened</div>
+            <form id="shortenForm" onsubmit="shortenLink(event)">
+                <div class="input-row">
+                    <input type="url" id="longUrl" placeholder="Enter the link here" required>
+                    <button type="submit">Shorten URL</button>
+                </div>
+            </form>
+            <div class="desc">
+                <span style="color:#039be5;font-weight:bold;">ShortURL</span> is a free tool to shorten URLs and
+                generate short links<br>
+                URL shortener allows to create a shortened link making it easy to share
+            </div>
+            <div class="short-link-section" id="shortLinkSection">
+                <div class="short-link-label">Your short link:</div>
+                <div class="short-link-box" id="shortLinkBox"></div>
+                <button class="copy-btn" onclick="copyShortLink()">Copy</button>
+            </div>
+            <div class="error" id="errorMsg"></div>
+        </div>
+    </div>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeToggle');
+            body.classList.toggle('dark');
+            if (body.classList.contains('dark')) {
+                btn.textContent = "☀️ Light Mode";
+            } else {
+                btn.textContent = "🌙 Dark Mode";
+            }
+        }
+
+        // Simple in-browser shortener (not real, for demo only)
+        function generateShortCode() {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function getBaseUrl() {
+            return window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+        }
+
+        function shortenLink(event) {
+            event.preventDefault();
+            const longUrl = document.getElementById('longUrl').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = '';
+            if (!/^https?:\/\//.test(longUrl)) {
+                errorMsg.textContent = "Please enter a valid URL (must start with http:// or https://)";
+                return;
+            }
+            const code = generateShortCode();
+            const shortUrl = getBaseUrl() + code;
+            document.getElementById('shortLinkBox').textContent = shortUrl;
+            document.getElementById('shortLinkSection').style.display = 'block';
+        }
+
+        function copyShortLink() {
+            const shortUrl = document.getElementById('shortLinkBox').textContent;
+            navigator.clipboard.writeText(shortUrl);
+        }
+    </script>
+</body>
+
+</html>
